@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package com.rental.renting.proto;
+
+option java_package = "com.rental.renting.grpc";
+option java_multiple_files = true;
+
+service RentingService{
+  rpc listAvailableApartments(Void) returns (Apartments) {}
+  rpc rentApartment(Apartment) returns (RentingResponse) {}
+}
+
+message Void{}
+
+message RentingResponse {
+  bool isRented = 1;
+}
+message Apartments{
+  repeated Apartment apartment = 1;
+}
+message Apartment{
+  string aptNo = 1;
+  string renterName = 2;
+  bool rented = 3;
+}

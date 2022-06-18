@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package com.rental.maintenance.proto;
+
+option java_package = "com.rental.maintenance.grpc";
+option java_multiple_files = true;
+
+service ApartmentMaintenance{
+  rpc provideMaintenance(WorkOrders) returns (stream JobDoneResponse) {};
+}
+
+message WorkOrders{
+  repeated WorkOrder order = 1;
+}
+
+message WorkOrder{
+  string aptNo = 1;
+  string workDescription = 2;
+}
+
+message JobDoneResponse{
+  bool jobDone = 1;
+}
