@@ -19,5 +19,6 @@ message WorkOrder{
 }
 
 message JobDoneResponse{
-  bool jobDone = 1;
+  string aptNo = 1;
+  bool jobDone = 2;
 }
