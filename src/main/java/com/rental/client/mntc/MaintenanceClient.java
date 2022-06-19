@@ -6,10 +6,14 @@ import com.rental.maintenance.grpc.WorkOrder;
 import com.rental.maintenance.grpc.WorkOrders;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class MaintenanceClient {
+    private Logger logger = LoggerFactory.getLogger(MaintenanceClient.class);
+
     public static void main(String[] args) {
         MaintenanceClient client = new MaintenanceClient();
         ApartmentMaintenanceGrpc.ApartmentMaintenanceBlockingStub mntcStub = client.getMaintenanceServiceNonBlockingStub();
@@ -24,9 +28,9 @@ public class MaintenanceClient {
         Iterator<JobDoneResponse> mntcResponse = mntcStub.provideMaintenance(orders);
         mntcResponse.forEachRemaining(resp -> {
             if (resp.getJobDone()) {
-                System.out.println("Maintenance provided in apartment " + resp.getAptNo());
+                logger.info("Maintenance provided in apartment {}", resp.getAptNo());
             } else {
-                System.out.println("Maintenance can not be provided in apartment " + resp.getAptNo());
+                logger.info("Maintenance can not be provided in apartment {}", resp.getAptNo());
             }
         });
     }
@@ -45,7 +49,7 @@ public class MaintenanceClient {
     }
 
     private void shutdown(ApartmentMaintenanceGrpc.ApartmentMaintenanceBlockingStub mntcStub) {
-        System.out.println("Shutting down channel");
+        logger.info("Shutting down channel");
         ManagedChannel channel = (ManagedChannel) mntcStub.getChannel();
         channel.shutdown();
     }

@@ -7,12 +7,15 @@ import com.rental.maintenance.grpc.WorkOrders;
 import com.rental.service.bean.ApartmentUnit;
 import com.rental.service.util.ApartmentRentalServiceDataAccess;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class MaintenanceService extends ApartmentMaintenanceGrpc.ApartmentMaintenanceImplBase {
 
     ApartmentRentalServiceDataAccess maintenanceDao = new ApartmentRentalServiceDataAccess();
+    private Logger logger = LoggerFactory.getLogger(MaintenanceService.class);
 
     @Override
     public void provideMaintenance(WorkOrders request, StreamObserver<JobDoneResponse> responseObserver) {
@@ -20,15 +23,16 @@ public class MaintenanceService extends ApartmentMaintenanceGrpc.ApartmentMainte
         orderList.forEach(order -> {
             if (validateRentedApartment(order.getAptNo())) {
                 responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(true).setAptNo(order.getAptNo()).build());
-                System.out.println("Work order completed for apartment "+order.getAptNo() + " | Work Description: " +order.getWorkDescription());
+                logger.info("Work order completed for apartment {}  | Work Description: {}", order.getAptNo(), order.getWorkDescription());
             } else {
-                System.out.println("Apartment "+order.getAptNo()+" is unoccupied or invalid apartment number is provided");
+                logger.info("Apartment {} is unoccupied or invalid apartment number is provided", order.getAptNo());
                 responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(false).setAptNo(order.getAptNo()).build());
             }
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                logger.error("Exception occurred {}", e.getMessage());
+                Thread.currentThread().interrupt();
             }
         });
         responseObserver.onCompleted();
