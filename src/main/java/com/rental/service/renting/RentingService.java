@@ -1,22 +1,25 @@
 package com.rental.service.renting;
 
-import com.rental.renting.grpc.*;
 import com.rental.renting.grpc.Void;
+import com.rental.renting.grpc.*;
 import com.rental.service.bean.ApartmentUnit;
 import com.rental.service.util.ApartmentRentalServiceDataAccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RentingService extends RentingServiceGrpc.RentingServiceImplBase {
 
+    private Logger logger = LoggerFactory.getLogger(RentingService.class);
     private final ApartmentRentalServiceDataAccess rentingDao = new ApartmentRentalServiceDataAccess();
 
     @Override
     public void rentApartment(Apartment request, io.grpc.stub.StreamObserver<RentingResponse> responseObserver) {
         boolean result = rentingDao.blockApartment(request.getAptNo(), request.getRenterName());
         RentingResponse response = RentingResponse.newBuilder().setIsRented(result).build();
-        System.out.println("Apartment No: "+request.getAptNo()+" - Rented: " + result);
+        logger.info("Apartment No: {} - Rented: {}", request.getAptNo(), result);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

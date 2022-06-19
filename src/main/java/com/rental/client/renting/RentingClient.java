@@ -4,10 +4,14 @@ import com.rental.renting.grpc.Void;
 import com.rental.renting.grpc.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class RentingClient {
+
+    private Logger logger = LoggerFactory.getLogger(RentingClient.class);
 
     public static void main(String[] args) {
         RentingClient rentingClient = new RentingClient();
@@ -27,21 +31,25 @@ public class RentingClient {
     }
 
     private void rentApartment(RentingServiceGrpc.RentingServiceBlockingStub rentingStub, String aptNo, String renterName) {
-        System.out.println("Renting Apartment " + aptNo);
+        logger.info("Renting Apartment {} ...", aptNo);
         RentingResponse rentResult = rentingStub.rentApartment(Apartment.newBuilder().setAptNo(aptNo).setRenterName(renterName).build());
         if (rentResult.getIsRented()) {
-            System.out.println("Apartment " + aptNo + " rented to " + renterName);
+            logger.info("\tApartment {} rented to {} ", aptNo, renterName);
         } else {
-            System.out.println("Apartment " + aptNo + " is not available ");
+            logger.info("\tApartment {} is not available ", aptNo);
         }
     }
 
     private void listAvailableApartments(RentingServiceGrpc.RentingServiceBlockingStub client) {
         Apartments avlApts = client.listAvailableApartments(Void.newBuilder().build());
         List<Apartment> aptList = avlApts.getApartmentList();
-        System.out.println("\n***** Welcome to Apartment Renting ***** \n List of Available Apartments:");
-        aptList.forEach(apt -> System.out.print("|| Apt No: " + apt.getAptNo() + " "));
-        System.out.println("\nTotal Apartments available :" + aptList.size() + "\n");
+        logger.info("\n***** Welcome to Apartment Renting ***** \nList of Available Apartments:");
+        StringBuilder sb = new StringBuilder("| ");
+        aptList.forEach(apt -> sb.append(apt.getAptNo()).append(" | "));
+        if(logger.isInfoEnabled()) {
+            logger.info(sb.toString());
+        }
+        logger.info("Total Apartments available :{} \n", aptList.size());
     }
 
     private RentingServiceGrpc.RentingServiceBlockingStub getRentingServiceBlockingStub() {
@@ -50,7 +58,7 @@ public class RentingClient {
     }
 
     private void shutdown(RentingServiceGrpc.RentingServiceBlockingStub rentingStub) {
-        System.out.println("Shutting down channel");
+        logger.info("Shutting down channel");
         ManagedChannel channel = (ManagedChannel) rentingStub.getChannel();
         channel.shutdown();
     }
