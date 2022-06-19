@@ -17,13 +17,13 @@ public class MaintenanceService extends ApartmentMaintenanceGrpc.ApartmentMainte
     @Override
     public void provideMaintenance(WorkOrders request, StreamObserver<JobDoneResponse> responseObserver) {
         List<WorkOrder> orderList = request.getOrderList();
-        System.out.println("Inside provideMaintenance");
         orderList.forEach(order -> {
             if (validateRentedApartment(order.getAptNo())) {
-                responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(true).build());
-                System.out.println("Work order complete - " + order.getWorkDescription());
+                responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(true).setAptNo(order.getAptNo()).build());
+                System.out.println("Work order completed for apartment "+order.getAptNo() + " | Work Description: " +order.getWorkDescription());
             } else {
-                responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(false).build());
+                System.out.println("Apartment "+order.getAptNo()+" is unoccupied or invalid apartment number is provided");
+                responseObserver.onNext(JobDoneResponse.newBuilder().setJobDone(false).setAptNo(order.getAptNo()).build());
             }
             try {
                 Thread.sleep(5000);
@@ -41,7 +41,6 @@ public class MaintenanceService extends ApartmentMaintenanceGrpc.ApartmentMainte
                 return true;
             }
         }
-        System.out.println("Apartment " + aptNo + " Not rented");
         return false;
     }
 }

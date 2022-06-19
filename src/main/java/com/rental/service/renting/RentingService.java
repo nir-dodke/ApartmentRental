@@ -16,7 +16,7 @@ public class RentingService extends RentingServiceGrpc.RentingServiceImplBase {
     public void rentApartment(Apartment request, io.grpc.stub.StreamObserver<RentingResponse> responseObserver) {
         boolean result = rentingDao.blockApartment(request.getAptNo(), request.getRenterName());
         RentingResponse response = RentingResponse.newBuilder().setIsRented(result).build();
-        System.out.println("Renting Result: " + result);
+        System.out.println("Apartment No: "+request.getAptNo()+" - Rented: " + result);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
